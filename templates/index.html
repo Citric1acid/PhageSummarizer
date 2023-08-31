@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phage Summarizer</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://getbootstrap.com/docs/4.0/assets/js/vendor/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 20px;
+            font-size: 16px;
+        }
+        button {
+            margin: 6px;
+            font-size: 16px;
+        }
+        input {
+            margin: 6px;
+            font-size: 16px;
+        }
+        .result {
+            border-bottom: 2px solid gray;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Phage Summarizer</h2>
+        <p>This work uses different softwares to find phage-like sequences from bacterial genome, 
+            and then summarize and combine their results. Please upload FASTA files as inputs 
+            (multiple files are accepted). Currently supported programs: PHASTER, Phigaro, and VIBRANT.
+        </p>
+        <p>Made by Zigang Song, contact info: songzigang@stu.pku.edu.cn</p>
+        <h3>Upload File</h3>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input id="uploadFile" type="file" name="fileInput" multiple style="display:block;">
+            <label>Method: </label>
+            <input id="method1" type="checkbox" name="method" value="phaster" checked>
+            <label for="method1">PHASTER</label>
+            <input id="method2" type="checkbox" name="method" value="phigaro" checked>
+            <label for="method2">Phigaro</label>
+            <input id="method3" type="checkbox" name="method" value="VIBRANT" checked>
+            <label for="method3">VIBRANT</label> <br>
+            <input type="submit" value="Upload">
+        </form>
+        
+        <h3>Result:</h3>
+        <button id="refresh">Refresh</button>
+        <p id="waiting" style="display: none;">Please wait ...</p>
+        <pre id="fileContent"></pre>
+    </div>
+    <script>
+        function getNames(formData) {
+            return formData.getAll("fileInput").map((value) => value.name);
+        }
+
+        function storeIds(data) {
+            var newIds = readIds().concat(data);
+            localStorage.setItem("Ids", JSON.stringify(newIds));
+        }
+
+        function readIds() {
+            return JSON.parse(localStorage.getItem("Ids")) || []
+        }
+
+        $(document).ready(function() {
+            $('#uploadForm').submit(function(e) {
+                e.preventDefault();
+                let formData = new FormData(this);
+                let names = getNames(formData);
+                console.log(names);
+
+                if ($("#uploadFile")[0].files.length == 0) {
+                    // no file to upload
+                    $("#fileContent").text("No file is selected!");
+                    return
+                }
+
+                $("#waiting").show();
+                $("#fileContent").text("Submitting " + names.toString());
+                formData.ids = readIds();
+
+                $.ajax({
+                    url: '/upload',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        $("#fileContent").text('Successfully uploaded.');
+                        $("#waiting").hide();
+                        var newIds = JSON.parse(response) || [];
+                        console.log(newIds);
+                        storeIds(newIds);
+                    },
+                    error: function(err) {
+                        $("#fileContent").text('Error uploading file.');
+                        console.error(err);
+                        $("#waiting").hide();
+                    }
+                });
+            });
+            $("#refresh").click(() => {
+                $("#waiting").show();
+                $.ajax({
+                    url: '/refresh',
+                    type: 'GET',
+                    data: {'ids': readIds().toString()},
+                    success: function(response) {
+                        $("#fileContent").html(response);
+                        $("#waiting").hide();
+                    },
+                    error: function(err) {
+                        $("#fileContent").text('Error happened.');
+                        console.error(err);
+                        $("#waiting").hide();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

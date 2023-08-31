@@ -1,0 +1,17 @@
+name: phage_summarizer
+channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - biopython=1.81
+  - Flask=2.3.3
+  - hmmer=3.3.2
+  - numpy=1.25.0
+  - pandas=2.0.3
+  - phigaro=2.3.0
+  - plotly=5.16.1
+  - prodigal=2.6.3
+  - requests=2.31.0
