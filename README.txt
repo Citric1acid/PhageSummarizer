@@ -4,7 +4,7 @@ This program is used to find phage sequences in bacterial genomes.
 This work summarizes and combines results from several existing phage-finding programs, in order to make better prediction on phage sequences. It combines the result from different programs, and uses BLAST to verify the results. It combines the advantage of different programs, and has higher accuracy. PHASTER, Phigaro, and VIBRANT are currently supported. This work will be posted online.
 
 Author: Zigang Song
-Contact info: songzigang@stu.pku.edu.com
+Contact info: songzigang@stu.pku.edu.cn
 
 Dependencies:
   - python=3.11
